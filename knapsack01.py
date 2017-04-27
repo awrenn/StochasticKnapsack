@@ -21,6 +21,7 @@ class item:
 def make_items(n,min_v,max_v,min_w,max_w):
     weights = []
     values = []
+    items = []
     
     for i in range(n):
         v = random.randint(min_v,max_v)
@@ -28,6 +29,7 @@ def make_items(n,min_v,max_v,min_w,max_w):
         w = random.randint(min_w,max_w)
         W = random.randint(min_w,max_w)
         new_item = item(v,V,w,W)
+        items += new_item
         weights.append(new_item.exp_w)
         values.append(new_item.exp_v)
                  
@@ -45,15 +47,30 @@ def knapSack(W, wt, val):
     for i in range(n+1):
         for w in range(W+1):
             if i==0 or w==0:
-                K[i][w] = 0
+                K[i][w] = [0, 0]
             elif wt[i-1] <= w:
-                K[i][w] = max(val[i-1] + K[i-1][w-wt[i-1]],  K[i-1][w])
+                if max(val[i-1] + K[i-1][w-wt[i-1]],  K[i-1][w]) == K[i-1][w]:
+                    K[i][w] = K[i-1][w]
+                else:
+                    K[i][w] = [max(val[i-1] + K[i-1][w-wt[i-1]],  K[i-1][w]), i-1]
             else:
                 K[i][w] = K[i-1][w]
  
     return K[n][W]
 
-items = make_items(100,1,10,1,10)
-best_value = knapSack(100, items[0], items[1])
+items = make_items(99,1,10,1,10)
+best_value = 0
+acc_w = 0
+
+while acc_w <= 100:
+    
+    first_item = knapSack(100-acc_w, items[0], items[1])[1]
+    best_value += items[2][first_item].exp_v
+
+    
+    
+    
+
+print(best_value)
 
 

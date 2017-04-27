@@ -25,7 +25,7 @@ class item:
         min_w = self.min_w
         exp_v = self.exp_v
         exp_w = self.exp_w
-        return (lambdas[0]*expected_return/float(exp_w) + lambdas[1]*(1/12.0*(max_w - min_w)**2) + lambdas[2]*(float(exp_v)/float(exp_v)))
+        return (lambdas[0]*expected_return/float(exp_w) + lambdas[1]*(1/12.0*(max_w - min_w)**2) + lambdas[2]*(float(exp_v)))
 
 def make_items(n,min_v,max_v,min_w,max_w):
     items = []
@@ -43,29 +43,28 @@ def stoch_knapsack(items,weight,lambdas):
     if not items:
         return 0
 
-    items = sorted(items, key= lambda item: item.get_score(weight,lambdas))
+    items = sorted(items, key = lambda item: -item.get_score(weight,lambdas))
     selected = items.pop(0)
     value = selected.exp_v
     used_cost = random.randint(selected.min_w,selected.max_w)
-    print(value,used_cost)
     if used_cost > weight:
         return 0
     else:
         return (value + stoch_knapsack(items,weight-used_cost,lambdas))
-# for r in range(5):
-#     random.seed(r)
-#     items = make_items(100,1,10,1,10)
-#     values = []
-#     values_1 = []
-#     lambdas = [1,0,0]
-#     lambdas_1 = [0,1,0]
-#     for t in range(100):
-#         a = stoch_knapsack(items[:],100,lambdas)
-#         b = stoch_knapsack(items[:],100,lambdas_1)
-#         values += [a]
-#         values_1 += [b]
-#     print("Adjusted ratio: ", sum(values)/float(len(values)), " on seed ", r)
-#     print("Pure ratio:     ", sum(values_1)/float(len(values_1)), " on seed ", r)
-#     print('\n')
+for r in range(5,10):
+    random.seed(r)
+    items = make_items(99,1,10,1,10)
+    values = []
+    values_1 = []
+    lambdas = [1,0,0]
+    lambdas_1 = [1,0,1]
+    for t in range(100):
+        a = stoch_knapsack(items[:],100,lambdas)
+        b = stoch_knapsack(items[:],100,lambdas_1)
+        values += [a]
+        values_1 += [b]
+    print("Adjusted ratio:   ", sum(values)/float(len(values)), " on seed ", r)
+    print("Test:             ", sum(values_1)/float(len(values_1)), " on seed ", r)
+    print('\n')
 
-print(stoch_knapsack(items,100000,lambdas))
+#print(stoch_knapsack(items,100000,lambdas))

@@ -38,17 +38,26 @@ def make_items(n,min_v,max_v,min_w,max_w):
         items += [item(v,V,w,W)]
     return items
 
+def hify_make_items(items):
+    weights = []
+    values = []
+    for new_item in items:
+        weights.append(int(math.ceil(new_item.exp_w)))
+        values.append(new_item.exp_v)
+    return weights, values
+
 def o_h_knapSack(W, items):
     #Currently most promising
+    if len(items) == 0:
+        return 0
+    if W <= 0:
+        return 0
     n = len(items)
     wt,val = hify_make_items(items)
     K = []
-    used_items = []
     p = [0 for x in range(W+1)]
     for z in range(n+1):
         K += [p[:]]
-        used_items += [p[:]]
-
     # Build table K[][] in bottom up manner
     for i in range(n+1):
         for w in range(W+1):
@@ -63,34 +72,42 @@ def o_h_knapSack(W, items):
             attempt /= int(item.max_w - item.min_w + 1)
             if attempt > K[i-1][w]:
                 K[i][w] = attempt
-                used_items[i][w] = 1
             else:
                 K[i][w] = K[i-1][w]
-                used_items[i][w] = 0
-    for w in range(W,-1,-1):
-        for i in range(n,0,-1):
-            if used_items[i][w] == 1:
-                return(K[n][W],items[i-1])
-    return None, None
+    return K[n][W]
 
-def stoch_knapsack(weight,items,lambdas = [1,0,0]):
+
+def stoch_knapsack(weight,items):
+    if not items or weight <= 0:
+        return 0
     total_max = 0
     for item in items:
         total_max += item.max_w
     weight = min(weight,total_max)
     possibilities = []
     for item in items:
-        temp_items = items[:]
+        temp_items = items.copy()
         temp_items.remove(item)
+        ev = 0
         for wt in range(item.min_w,item.max_w+1):
-            val, selected = o_h_knapSack(weight,temp_items)
-            possibilities += [(val+item.exp_v,selected)]
-
-    possibilities = sorted(possibilities)
+            if wt <= weight:
+                ev += item.exp_v + o_h_knapSack(weight-wt,list(temp_items))
+        possibilities += [(ev/(item.max_w-item.min_w+1),item)]
+    possibilities = sorted(possibilities, key = lambda x: -x[0])
     choice = possibilities.pop(0)[1]
     used_cost = random.randint(choice.min_w,choice.max_w)
     items.remove(choice)
     if used_cost > weight:
         return 0
     else:
-        return (choice.value + o_stoch_knapsack(weight-used_cost,items,lambdas))
+        return (choice.exp_v + stoch_knapsack(weight-used_cost,items))
+
+items = set(make_items(99,1,10,2,10))
+tic = time.time()
+values = []
+for t in range(10):
+    values += [stoch_knapsack(120,items.copy())]
+print(values)
+print(sum(values)/len(values))
+toc = time.time()
+print(toc-tic)

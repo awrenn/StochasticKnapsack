@@ -67,18 +67,30 @@ def o_h_knapSack(W, items):
             else:
                 K[i][w] = K[i-1][w]
                 used_items[i][w] = 0
-    for w in range(w,-1,-1):
-        for i in range(n,-1,-1):
+    for w in range(W,-1,-1):
+        for i in range(n,0,-1):
             if used_items[i][w] == 1:
                 return(K[n][W],items[i-1])
+    return None, None
 
-def stoch_knapsack(weight,items,lambdas):
-    items = sorted(items, key = lambda item: item.get_score(weight,lambdas))
-    val, selected = o_h_knapSack(weight,items)
-    items.remove(selected)
-    value = selected.exp_v
-    used_cost = random.randint(selected.min_w,selected.max_w)
+def stoch_knapsack(weight,items,lambdas = [1,0,0]):
+    total_max = 0
+    for item in items:
+        total_max += item.max_w
+    weight = min(weight,total_max)
+    possibilities = []
+    for item in items:
+        temp_items = items[:]
+        temp_items.remove(item)
+        for wt in range(item.min_w,item.max_w+1):
+            val, selected = o_h_knapSack(weight,temp_items)
+            possibilities += [(val+item.exp_v,selected)]
+
+    possibilities = sorted(possibilities)
+    choice = possibilities.pop(0)[1]
+    used_cost = random.randint(choice.min_w,choice.max_w)
+    items.remove(choice)
     if used_cost > weight:
-        return [0,0]
+        return 0
     else:
-        return (value + o_h_knapSack(weight-used_cost,items)[0])
+        return (choice.value + o_stoch_knapsack(weight-used_cost,items,lambdas))

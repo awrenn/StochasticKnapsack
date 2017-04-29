@@ -1,6 +1,7 @@
 import random
 import time
 import math
+import pickle
 
 class item:
     def __init__(self,min_v,max_v,min_w,max_w):
@@ -102,11 +103,18 @@ def stoch_knapsack(weight,items):
     else:
         return (choice.exp_v + stoch_knapsack(weight-used_cost,items))
 
-items = set(make_items(99,1,10,2,10))
+item_1 = item(4,4,2,2)
+item_2 = item(10,10,10,10)
+item_3 = item(1,1,1,2)
+items = [item_1,item_2,item_3]
+with open("trick_items.txt","rb") as fp:
+    items = pickle.load(fp)
+
+items = set(items)
 tic = time.time()
 values = []
-for t in range(10):
-    values += [stoch_knapsack(120,items.copy())]
+for t in range(1):
+    values += [stoch_knapsack(11,items.copy())]
 print(values)
 print(sum(values)/len(values))
 toc = time.time()

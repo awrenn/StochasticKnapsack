@@ -43,8 +43,8 @@ def hify_make_items(items):
     weights = []
     values = []
     for new_item in items:
-        weights.append(int(math.ceil(new_item.exp_w)))
-        values.append(new_item.exp_v)
+        weights += [int(math.ceil(new_item.exp_w))]
+        values += [new_item.exp_v]
     return weights, values
 
 def o_h_knapSack(W, items):
@@ -79,6 +79,7 @@ def o_h_knapSack(W, items):
 
 
 def stoch_knapsack(weight,items):
+    items = sorted(items, key = lambda item: -item.get_score(weight))
     if not items or weight <= 0:
         return 0
     total_max = 0
@@ -103,19 +104,19 @@ def stoch_knapsack(weight,items):
     else:
         return (choice.exp_v + stoch_knapsack(weight-used_cost,items))
 
-item_1 = item(4,4,2,2)
-item_2 = item(10,10,10,10)
-item_3 = item(1,1,1,2)
-items = [item_1,item_2,item_3]
-with open("trick_items.txt","rb") as fp:
-    items = pickle.load(fp)
-
-items = set(items)
-tic = time.time()
-values = []
-for t in range(1):
-    values += [stoch_knapsack(11,items.copy())]
-print(values)
-print(sum(values)/len(values))
-toc = time.time()
-print(toc-tic)
+# item_1 = item(4,4,2,2)
+# item_2 = item(10,10,10,10)
+# item_3 = item(1,1,1,2)
+# items = [item_1,item_2,item_3]
+# with open("trick_items.txt","rb") as fp:
+#     items = pickle.load(fp)
+#
+# items = set(items)
+# tic = time.time()
+# values = []
+# for t in range(1):
+#     values += [stoch_knapsack(11,items.copy())]
+# print(values)
+# print(sum(values)/len(values))
+# toc = time.time()
+# print(toc-tic)

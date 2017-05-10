@@ -56,6 +56,7 @@ def o_h_knapSack(W, items):
     n = len(items)
     wt,val = hify_make_items(items)
     K = []
+    print(W)
     p = [0 for x in range(W+1)]
     for z in range(n+1):
         K += [p[:]]
@@ -67,7 +68,12 @@ def o_h_knapSack(W, items):
                 pass
             item = items[i-1]
             attempt = 0
-            for wt in range(item.min_w,item.max_w+1):
+            to_use = [item.min_w,item.max_w]
+            if item.exp_w % 1 == .5:
+                to_use += [int(item.exp_w - .5), int(item.exp_w + .5)]
+            else:
+                to_use += [int(item.exp_w)]
+            for wt in to_use:
                 if wt <= w:
                     attempt += item.exp_v + K[i-1][w-wt]
             attempt /= int(item.max_w - item.min_w + 1)
@@ -78,8 +84,8 @@ def o_h_knapSack(W, items):
     return K[n][W]
 
 
-def stoch_knapsack(weight,items):
-    items = sorted(items, key = lambda item: -item.get_score(weight))
+def stoch_knapsack(weight,items,lambdas = [1,0,0]):
+    items = sorted(items, key = lambda item: -item.get_score(weight,lambdas))
     if not items or weight <= 0:
         return 0
     total_max = 0
@@ -91,10 +97,16 @@ def stoch_knapsack(weight,items):
         temp_items = items.copy()
         temp_items.remove(item)
         ev = 0
-        for wt in range(item.min_w,item.max_w+1):
+        to_use = [item.min_w,item.max_w]
+        if item.exp_w % 1 == .5:
+            to_use += [int(item.exp_w - .5), int(item.exp_w + .5)]
+        else:
+            to_use += [int(item.exp_w)]
+        for wt in to_use:
             if wt <= weight:
                 ev += item.exp_v + o_h_knapSack(weight-wt,list(temp_items))
         possibilities += [(ev/(item.max_w-item.min_w+1),item)]
+
     possibilities = sorted(possibilities, key = lambda x: -x[0])
     choice = possibilities.pop(0)[1]
     used_cost = random.randint(choice.min_w,choice.max_w)
@@ -103,20 +115,3 @@ def stoch_knapsack(weight,items):
         return 0
     else:
         return (choice.exp_v + stoch_knapsack(weight-used_cost,items))
-
-# item_1 = item(4,4,2,2)
-# item_2 = item(10,10,10,10)
-# item_3 = item(1,1,1,2)
-# items = [item_1,item_2,item_3]
-# with open("trick_items.txt","rb") as fp:
-#     items = pickle.load(fp)
-#
-# items = set(items)
-# tic = time.time()
-# values = []
-# for t in range(1):
-#     values += [stoch_knapsack(11,items.copy())]
-# print(values)
-# print(sum(values)/len(values))
-# toc = time.time()
-# print(toc-tic)

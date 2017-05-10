@@ -1,4 +1,5 @@
 import FinalAlg as slow
+import learning_algorithm as greedy
 import knapsack01 as quick
 import pickle
 import time
@@ -23,37 +24,147 @@ class item:
         else:
             return min(self.exp_v * possible_percent, self.exp_v)
 
+    def get_score(self,remaining,lambdas):
+        expected_return = self.expected_return(remaining)
+        max_w = self.max_w
+        min_w = self.min_w
+        exp_v = self.exp_v
+        exp_w = self.exp_w
+        return (lambdas[0]*expected_return/float(exp_w) + lambdas[1]*(1/12.0*(max_w - min_w)**2)*expected_return + lambdas[2]*(float(exp_v)*expected_return))
+
     def actual_weight(self):
         return random.randint(self.min_w, self.max_w)
 
     def actual_value(self):
         return self.exp_v
 
-values_slow = []
-values_quick = []
-for i in range(10):
-    weights, values, items = quick.make_items(99,2,10,2,10)
-    for t in range(10):
-        tic = time.time()
-        a = slow.stoch_knapsack(120,items[:])
-        toc = time.time()
-        print(toc-tic)
-        tic = time.time()
-        b = quick.knapSack(120,weights,values,items[:])
-        toc = time.time()
-        print(toc-tic)
-        values_slow += [a]
-        values_quick += [b[0]]
+def make_items_number_1():
+    items = []
+    values = []
+    weights = []
+    for i in range(99):
+        new_item = item(20,20,2**100/20,2**100/20)
+        items += [new_item]
+        values += [new_item.exp_v]
+        weights += [int(new_item.exp_w)]
+    new_item = item(1000,1000,2**100,2**100)
+    items += [new_item]
+    values += [new_item.exp_v]
+    weights += [int(new_item.exp_w)]
+    return weights, values, items
 
-with open("trick_items.txt","rb") as fp:
-    items = pickle.load(fp)
+def make_items_number_2():
+    items = []
+    values = []
+    weights = []
+    for i in range(99):
+        new_item = item(20,20,2**100/20,2**100/20)
+        items += [new_item]
+        values += [new_item.exp_v]
+        weights += [int(new_item.exp_w)]
+    new_item = item(1000,1000,2**100+1,2**100+1)
+    items += [new_item]
+    values += [new_item.exp_v]
+    weights += [int(new_item.exp_w)]
+    return weights, values, items
 
-weights, values = slow.hify_make_items(items)
-for t in range(1):
-    a = slow.stoch_knapsack(11,items[:])
-    b = quick.knapSack(11,weights,values,items[:])
-    print(a)
-    print(b)
+def make_items_number_3():
+    items = []
+    values = []
+    weights = []
+    for i in range(10):
+        new_item = item(1,1,1,1)
+        items += [new_item]
+        values += [new_item.exp_v]
+        weights += [int(new_item.exp_w)]
+    for i in range(10,100):
+        new_item = item(1000,1000,2**100,2**100)
+        items += [new_item]
+        values += [new_item.exp_v]
+        weights += [int(new_item.exp_w)]
+    return weights, values, items
 
-print(sum(values_slow)/len(values_slow))
-print(sum(values_quick)/len(values_quick))
+def make_items_number_4():
+    items = []
+    values = []
+    weights = []
+    for i in range(1,101):
+        new_item = item(2**100-2**(i-1),2**100+2**(i-1),2**94-2**(i-1),2**94+2**(i-1))
+        items += [new_item]
+        values += [new_item.exp_v]
+        weights += [int(new_item.exp_w)]
+    return weights, values, items
+
+def make_items_number_5():
+    items = []
+    values = []
+    weights = []
+    for i in range(1,101):
+        new_item = item(1,100,2**94-2**(i-1),2**94+4**(i-1))
+        items += [new_item]
+        values += [new_item.exp_v]
+        weights += [int(new_item.exp_w)]
+    return weights, values, items
+
+def make_items_number_6():
+    items = []
+    values = []
+    weights = []
+    for i in range(1,101):
+        new_item = item(0,2**i,2**94-2**(i-1),2**94+4**(i-1))
+        items += [new_item]
+        values += [new_item.exp_v]
+        weights += [int(new_item.exp_w)]
+    return weights, values, items
+
+def make_items_number_7():
+    items = []
+    values = []
+    weights = []
+    for i in range(1,101):
+        new_item = item(0,2**i,2**(i-1),2**i)
+        items += [new_item]
+        values += [new_item.exp_v]
+        weights += [int(new_item.exp_w)]
+    return weights, values, items
+
+lambdas = [1,-0.01,0.01]
+weights, values, items = make_items_number_1()
+a = greedy.stoch_knapsack(items[:],2**100,lambdas)
+print(a)
+
+weights, values, items  = make_items_number_2()
+a = greedy.stoch_knapsack(items[:],2**100,lambdas)
+print(a)
+
+weights, values, items  = make_items_number_3()
+a = greedy.stoch_knapsack(items[:],2**100,lambdas)
+print(a)
+
+weights, values, items  = make_items_number_4()
+vals = []
+for t in range(100):
+    vals += [greedy.stoch_knapsack(items[:],2**100,lambdas)]
+print(sum(vals)/len(vals))
+
+weights, values, items  = make_items_number_5()
+vals = []
+for t in range(100):
+    vals += [greedy.stoch_knapsack(items[:],2**100,lambdas)]
+print(sum(vals)/len(vals))
+
+weights, values, items  = make_items_number_6()
+vals = []
+for t in range(100):
+    vals += [greedy.stoch_knapsack(items[:],2**100,lambdas)]
+print(sum(vals)/len(vals))
+
+weights, values, items  = make_items_number_7()
+vals = []
+for t in range(100):
+    vals += [greedy.stoch_knapsack(items[:],2**100,lambdas)]
+print(sum(vals)/len(vals))
+
+
+#print(sum(values_slow)/len(values_slow))
+#print(sum(values_quick)/len(values_quick))
